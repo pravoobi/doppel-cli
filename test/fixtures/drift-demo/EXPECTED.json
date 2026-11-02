@@ -1,0 +1,579 @@
+{
+  "$schema": "./expected.schema.json",
+  "version": 1,
+  "fixture": "drift-demo",
+  "generatedBy": "scripts/generate-expected.mjs",
+  "note": "Generated file. Do not hand-edit — change the manifest in the generator and re-run. Line numbers are resolved from anchors, and fileHashes pin the fixture content they were resolved against.",
+  "designSystem": {
+    "path": "components/ui",
+    "components": [
+      "Button",
+      "Card",
+      "Alert",
+      "Badge",
+      "Input",
+      "Label",
+      "Dialog",
+      "Table"
+    ]
+  },
+  "summary": {
+    "totalCases": 18,
+    "trueDrifts": 16,
+    "traps": 3,
+    "negatives": 6,
+    "byKind": {
+      "button": 4,
+      "card": 3,
+      "badge": 2,
+      "alert": 2,
+      "table": 1,
+      "input": 2,
+      "dialog": 1,
+      "trap:intentional": 1,
+      "trap:not-drift": 1,
+      "trap:unverifiable": 1
+    },
+    "byVerdict": {
+      "PASS": 12,
+      "REVIEW": 3,
+      "n/a": 2,
+      "UNVERIFIABLE": 1
+    }
+  },
+  "targets": {
+    "detectionRecall": 1,
+    "minPrecision": 0.8,
+    "maxFalsePositives": 4,
+    "minClassificationAccuracy": 0.85,
+    "minVerdictAccuracy": 0.8,
+    "lineMatchTolerance": 2
+  },
+  "fileHashes": {
+    "app/billing/page.tsx": "be6209088b5629d7",
+    "app/page.tsx": "1c6edb9efceefc2c",
+    "app/settings/page.tsx": "9fda3d55f0bdd984",
+    "app/team/page.tsx": "c9483eb3f89e7749",
+    "components/layout/shell.tsx": "08ed93b3b261684e",
+    "components/marketing/hero.tsx": "611474cafab5c76d",
+    "components/reports/report-viewer.tsx": "a673da710e99ed18",
+    "components/ui/card.tsx": "96c7a1385ade4b53"
+  },
+  "cases": [
+    {
+      "id": "btn-001",
+      "kind": "button",
+      "file": "app/page.tsx",
+      "line": 28,
+      "anchor": "Export CSV",
+      "anchorLine": 32,
+      "rootTag": "button",
+      "snippet": "<button",
+      "why": "Plain hand-rolled primary button. The base case — if this is missed, nothing else matters.",
+      "expect": {
+        "detected": true,
+        "matchedComponent": "Button",
+        "classification": "DRIFT",
+        "minTriageConfidence": 0.7,
+        "risk": "low",
+        "unmappable": [],
+        "verdict": "PASS",
+        "propMapping": [
+          {
+            "from": "onClick",
+            "to": "onClick"
+          }
+        ]
+      }
+    },
+    {
+      "id": "card-001",
+      "kind": "card",
+      "file": "app/page.tsx",
+      "line": 43,
+      "anchor": "{metrics[0].label}",
+      "anchorLine": 45,
+      "rootTag": "div",
+      "snippet": "<div className=\"rounded-xl border bg-white p-6 shadow-sm\">",
+      "why": "Stat card as a raw div, sitting next to a real <Card> rendering the same shape.",
+      "expect": {
+        "detected": true,
+        "matchedComponent": "Card",
+        "classification": "DRIFT",
+        "minTriageConfidence": 0.6,
+        "risk": "low",
+        "unmappable": [],
+        "verdict": "PASS",
+        "secondaryComponents": [
+          "CardContent"
+        ]
+      }
+    },
+    {
+      "id": "badge-001",
+      "kind": "badge",
+      "file": "app/page.tsx",
+      "line": 48,
+      "anchor": "text-emerald-800",
+      "anchorLine": 48,
+      "rootTag": "span",
+      "snippet": "<span className=\"mt-3 inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emer",
+      "why": "Status pill whose colours map exactly onto Badge variant='success'. Should be a clean PASS.",
+      "expect": {
+        "detected": true,
+        "matchedComponent": "Badge",
+        "classification": "DRIFT",
+        "minTriageConfidence": 0.7,
+        "risk": "low",
+        "unmappable": [],
+        "verdict": "PASS",
+        "propMapping": [
+          {
+            "from": "bg-emerald-100 text-emerald-800",
+            "to": "variant=\"success\""
+          }
+        ]
+      }
+    },
+    {
+      "id": "card-002",
+      "kind": "card",
+      "file": "app/page.tsx",
+      "line": 53,
+      "anchor": "{metrics[1].label}",
+      "anchorLine": 55,
+      "rootTag": "div",
+      "snippet": "<div className=\"rounded-xl border bg-white p-6 shadow-sm\">",
+      "why": "Second hand-rolled card, this one already containing a real <Badge>. Tests partial adoption.",
+      "expect": {
+        "detected": true,
+        "matchedComponent": "Card",
+        "classification": "DRIFT",
+        "minTriageConfidence": 0.6,
+        "risk": "low",
+        "unmappable": [],
+        "verdict": "PASS",
+        "secondaryComponents": [
+          "CardContent"
+        ]
+      }
+    },
+    {
+      "id": "alert-001",
+      "kind": "alert",
+      "file": "app/billing/page.tsx",
+      "line": 17,
+      "anchor": "Your last payment failed",
+      "anchorLine": 21,
+      "rootTag": "div",
+      "snippet": "<div",
+      "why": "Alert that already has role='alert'. Migration is cosmetic, not an a11y fix — pairs with alert-002.",
+      "expect": {
+        "detected": true,
+        "matchedComponent": "Alert",
+        "classification": "DRIFT",
+        "minTriageConfidence": 0.7,
+        "risk": "low",
+        "unmappable": [],
+        "verdict": "PASS",
+        "secondaryComponents": [
+          "AlertTitle",
+          "AlertDescription"
+        ],
+        "propMapping": [
+          {
+            "from": "border-red-300 bg-red-50",
+            "to": "variant=\"destructive\""
+          }
+        ]
+      }
+    },
+    {
+      "id": "badge-002",
+      "kind": "badge",
+      "file": "app/billing/page.tsx",
+      "line": 32,
+      "anchor": "bg-violet-100",
+      "anchorLine": 32,
+      "rootTag": "span",
+      "snippet": "<span className=\"inline-flex items-center rounded-full border border-transparent bg-violet-100 px-2.5 py-0.5 text-xs fon",
+      "why": "Badge in a colour the design system has no variant for. Must surface as unmappable, not silently recoloured.",
+      "expect": {
+        "detected": true,
+        "matchedComponent": "Badge",
+        "classification": "DRIFT",
+        "minTriageConfidence": 0.6,
+        "risk": "medium",
+        "unmappable": [
+          "violet palette has no corresponding Badge variant"
+        ],
+        "verdict": "REVIEW"
+      }
+    },
+    {
+      "id": "btn-002",
+      "kind": "button",
+      "file": "app/billing/page.tsx",
+      "line": 38,
+      "anchor": "Upgrade to Scale",
+      "anchorLine": 42,
+      "rootTag": "button",
+      "snippet": "<button",
+      "why": "Gradient CTA. Button has no gradient variant, so an honest run reports the tradeoff instead of flattening the design.",
+      "expect": {
+        "detected": true,
+        "matchedComponent": "Button",
+        "classification": "DRIFT",
+        "minTriageConfidence": 0.6,
+        "risk": "high",
+        "unmappable": [
+          "bg-gradient-to-r has no corresponding Button variant",
+          "shadow-lg exceeds the shadow scale Button exposes"
+        ],
+        "verdict": "REVIEW"
+      }
+    },
+    {
+      "id": "table-001",
+      "kind": "table",
+      "file": "app/billing/page.tsx",
+      "line": 52,
+      "anchor": "<table className=\"w-full text-sm\">",
+      "anchorLine": 52,
+      "rootTag": "table",
+      "snippet": "<table className=\"w-full text-sm\">",
+      "why": "Hand-rolled table with no caption and no scope on headers. Migration is a real a11y gain.",
+      "expect": {
+        "detected": true,
+        "matchedComponent": "Table",
+        "classification": "DRIFT",
+        "minTriageConfidence": 0.7,
+        "risk": "medium",
+        "unmappable": [],
+        "verdict": "PASS",
+        "secondaryComponents": [
+          "TableHeader",
+          "TableBody",
+          "TableRow",
+          "TableHead",
+          "TableCell"
+        ],
+        "accessibilityGain": "adds <caption> and scope='col' on headers"
+      }
+    },
+    {
+      "id": "alert-002",
+      "kind": "alert",
+      "file": "app/settings/page.tsx",
+      "line": 19,
+      "anchor": "Your trial ends in 5 days",
+      "anchorLine": 20,
+      "rootTag": "div",
+      "snippet": "<div className=\"rounded-lg border border-amber-500/50 bg-amber-50 px-4 py-3 text-sm text-amber-900\">",
+      "why": "Same shape as alert-001 but with no role. Colours map cleanly to variant='warning', so the migration is visually identical and purely an a11y win. This is the headline example for the demo.",
+      "expect": {
+        "detected": true,
+        "matchedComponent": "Alert",
+        "classification": "DRIFT",
+        "minTriageConfidence": 0.7,
+        "risk": "low",
+        "unmappable": [],
+        "verdict": "PASS",
+        "secondaryComponents": [
+          "AlertTitle",
+          "AlertDescription"
+        ],
+        "propMapping": [
+          {
+            "from": "border-amber-500/50 bg-amber-50",
+            "to": "variant=\"warning\""
+          }
+        ],
+        "accessibilityGain": "adds role='alert' — the banner was previously invisible to assistive tech"
+      }
+    },
+    {
+      "id": "input-001",
+      "kind": "input",
+      "file": "app/settings/page.tsx",
+      "line": 30,
+      "anchor": "Organisation name",
+      "anchorLine": 32,
+      "rootTag": "div",
+      "snippet": "<div className=\"flex flex-col gap-2\">",
+      "why": "Label and input with no htmlFor/id association. Migration must add the association, not just swap tags.",
+      "expect": {
+        "detected": true,
+        "matchedComponent": "Input",
+        "classification": "DRIFT",
+        "minTriageConfidence": 0.6,
+        "risk": "low",
+        "unmappable": [],
+        "verdict": "PASS",
+        "secondaryComponents": [
+          "Label"
+        ],
+        "accessibilityGain": "associates label and input via htmlFor/id"
+      }
+    },
+    {
+      "id": "input-002",
+      "kind": "input",
+      "file": "app/settings/page.tsx",
+      "line": 42,
+      "anchor": "Primary domain",
+      "anchorLine": 44,
+      "rootTag": "div",
+      "snippet": "<div className=\"flex flex-col gap-2\">",
+      "why": "Near-identical copy of input-001. Both must be found — de-duplication that collapses them is a bug.",
+      "expect": {
+        "detected": true,
+        "matchedComponent": "Input",
+        "classification": "DRIFT",
+        "minTriageConfidence": 0.6,
+        "risk": "low",
+        "unmappable": [],
+        "verdict": "PASS",
+        "secondaryComponents": [
+          "Label"
+        ],
+        "accessibilityGain": "associates label and input via htmlFor/id"
+      }
+    },
+    {
+      "id": "btn-003",
+      "kind": "button",
+      "file": "app/settings/page.tsx",
+      "line": 70,
+      "anchor": "Save changes",
+      "anchorLine": 74,
+      "rootTag": "button",
+      "snippet": "<button",
+      "why": "Slate-palette button. Maps to variant='default' despite not sharing a single class token with it.",
+      "expect": {
+        "detected": true,
+        "matchedComponent": "Button",
+        "classification": "DRIFT",
+        "minTriageConfidence": 0.7,
+        "risk": "low",
+        "unmappable": [],
+        "verdict": "PASS"
+      }
+    },
+    {
+      "id": "card-003",
+      "kind": "card",
+      "file": "app/team/page.tsx",
+      "line": 28,
+      "anchor": "rounded-lg border bg-white p-4 shadow-sm",
+      "anchorLine": 30,
+      "rootTag": "div",
+      "snippet": "<div",
+      "why": "A hand-rolled card nested inside a real <Card>. Genuine drift — but the enclosing real Card must not also be flagged (see negatives).",
+      "expect": {
+        "detected": true,
+        "matchedComponent": "Card",
+        "classification": "DRIFT",
+        "minTriageConfidence": 0.5,
+        "risk": "low",
+        "unmappable": [],
+        "verdict": "PASS"
+      }
+    },
+    {
+      "id": "btn-004",
+      "kind": "button",
+      "file": "app/team/page.tsx",
+      "line": 43,
+      "anchor": "role=\"button\"",
+      "anchorLine": 44,
+      "rootTag": "div",
+      "snippet": "<div",
+      "why": "A div with role='button' and a click handler but no keyboard handler and no tabIndex. Keyboard users cannot reach it at all.",
+      "expect": {
+        "detected": true,
+        "matchedComponent": "Button",
+        "classification": "DRIFT",
+        "minTriageConfidence": 0.7,
+        "risk": "medium",
+        "unmappable": [],
+        "verdict": "PASS",
+        "propMapping": [
+          {
+            "from": "onClick",
+            "to": "onClick"
+          },
+          {
+            "from": "role=\"button\"",
+            "to": "native <button>"
+          }
+        ],
+        "accessibilityGain": "becomes a real button — keyboard focusable, Enter/Space activation, correct role"
+      }
+    },
+    {
+      "id": "modal-001",
+      "kind": "dialog",
+      "file": "app/team/page.tsx",
+      "line": 66,
+      "anchor": "fixed inset-0 z-50 flex items-center justify-center",
+      "anchorLine": 66,
+      "rootTag": "div",
+      "snippet": "<div className=\"fixed inset-0 z-50 flex items-center justify-center\">",
+      "why": "Hand-rolled modal: no Escape handling, no focus trap, no focus restore, no aria-modal. Structurally the largest migration in the fixture.",
+      "expect": {
+        "detected": true,
+        "matchedComponent": "Dialog",
+        "classification": "DRIFT",
+        "minTriageConfidence": 0.6,
+        "risk": "high",
+        "unmappable": [],
+        "verdict": "REVIEW",
+        "secondaryComponents": [
+          "DialogContent",
+          "DialogTitle",
+          "DialogFooter"
+        ],
+        "accessibilityGain": "adds aria-modal, Escape to dismiss and focus restore on close"
+      }
+    },
+    {
+      "id": "trap-001",
+      "kind": "trap:intentional",
+      "file": "components/marketing/hero.tsx",
+      "line": 27,
+      "anchor": "Start free",
+      "anchorLine": 31,
+      "rootTag": "a",
+      "snippet": "<a",
+      "why": "Brand-owned marketing CTA. Structurally a button, deliberately off-system. Migrating it would be a regression. A tool that flags this as DRIFT does not understand design systems.",
+      "expect": {
+        "detected": true,
+        "matchedComponent": "Button",
+        "classification": "INTENTIONAL_DEVIATION",
+        "minTriageConfidence": 0.4,
+        "risk": null,
+        "unmappable": [],
+        "verdict": null,
+        "patchGenerated": false
+      }
+    },
+    {
+      "id": "trap-002",
+      "kind": "trap:not-drift",
+      "file": "components/layout/shell.tsx",
+      "line": 23,
+      "anchor": "min-h-full rounded-xl border bg-white p-6 shadow-sm",
+      "anchorLine": 25,
+      "rootTag": "div",
+      "snippet": "<div",
+      "why": "Carries every class token a Card carries, but it is a layout region with no grouping semantics. The shortlist rules will surface it; the adjudicator has to reject it.",
+      "expect": {
+        "detected": true,
+        "matchedComponent": "Card",
+        "classification": "NOT_DRIFT",
+        "minTriageConfidence": 0.3,
+        "risk": null,
+        "unmappable": [],
+        "verdict": null,
+        "patchGenerated": false
+      }
+    },
+    {
+      "id": "trap-003",
+      "kind": "trap:unverifiable",
+      "file": "components/reports/report-viewer.tsx",
+      "line": 43,
+      "anchor": "Download PDF",
+      "anchorLine": 47,
+      "rootTag": "button",
+      "snippet": "<button",
+      "why": "Genuine drift inside a component that cannot mount in isolation — it needs route params, a query string and a context with no default. The patch must be generated AND labelled unproven. Claiming PASS here is the single worst failure mode in the product.",
+      "expect": {
+        "detected": true,
+        "matchedComponent": "Button",
+        "classification": "DRIFT",
+        "minTriageConfidence": 0.7,
+        "risk": "low",
+        "unmappable": [],
+        "verdict": "UNVERIFIABLE",
+        "patchGenerated": true,
+        "unverifiableReason": "requires useParams, useSearchParams and WorkspaceContext; throws outside a provider"
+      }
+    }
+  ],
+  "negatives": [
+    {
+      "id": "neg-001",
+      "file": "app/page.tsx",
+      "line": 63,
+      "anchor": "{metrics[2].label}",
+      "rootTag": "Card",
+      "snippet": "<Card>",
+      "why": "A correct <Card> usage sitting between two drifted copies.",
+      "expect": {
+        "detected": false
+      }
+    },
+    {
+      "id": "neg-002",
+      "file": "app/page.tsx",
+      "line": 82,
+      "anchor": "className=\"flex items-center justify-between border-b py-3 last:border-0\"",
+      "rootTag": "div",
+      "snippet": "<div",
+      "why": "A list row. Bordered and padded, but no component in the system represents it.",
+      "expect": {
+        "detected": false
+      }
+    },
+    {
+      "id": "neg-003",
+      "file": "app/settings/page.tsx",
+      "line": 55,
+      "anchor": "htmlFor=\"billing-email\"",
+      "rootTag": "Label",
+      "snippet": "<Label htmlFor=\"billing-email\" required>",
+      "why": "A correctly associated Label/Input pair, two fields below two drifted ones.",
+      "expect": {
+        "detected": false
+      }
+    },
+    {
+      "id": "neg-004",
+      "file": "app/team/page.tsx",
+      "line": 85,
+      "anchor": "variant=\"destructive\"",
+      "rootTag": "Button",
+      "snippet": "<Button",
+      "why": "A real Button inside the hand-rolled modal. Partial adoption must not drag correct usages into the report.",
+      "expect": {
+        "detected": false
+      }
+    },
+    {
+      "id": "neg-005",
+      "file": "components/ui/card.tsx",
+      "line": 10,
+      "anchor": "\"rounded-xl border bg-card text-card-foreground shadow\"",
+      "rootTag": "div",
+      "snippet": "<div",
+      "why": "The design system's own source. Scanning must exclude the DS directory or every primitive self-reports as drift.",
+      "expect": {
+        "detected": false
+      }
+    },
+    {
+      "id": "neg-006",
+      "file": "app/page.tsx",
+      "line": 17,
+      "anchor": "className=\"mx-auto flex max-w-6xl flex-col gap-8 p-8\"",
+      "rootTag": "div",
+      "snippet": "<div className=\"mx-auto flex max-w-6xl flex-col gap-8 p-8\">",
+      "why": "Page shell. Padding and flex alone must never be enough to flag something.",
+      "expect": {
+        "detected": false
+      }
+    }
+  ]
+}

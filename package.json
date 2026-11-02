@@ -1,0 +1,66 @@
+{
+  "name": "doppel-cli",
+  "version": "0.1.0",
+  "description": "Find hand-rolled UI components that duplicate your design system, with any LLM.",
+  "license": "Apache-2.0",
+  "author": "Venkata Praveen Velisetty",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pravoobi/doppel-cli.git"
+  },
+  "homepage": "https://github.com/pravoobi/doppel-cli#readme",
+  "bugs": {
+    "url": "https://github.com/pravoobi/doppel-cli/issues"
+  },
+  "type": "module",
+  "bin": {
+    "doppel": "dist/cli.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "prompts"
+  ],
+  "engines": {
+    "node": ">=20.12"
+  },
+  "keywords": [
+    "design-system",
+    "shadcn",
+    "react",
+    "lint",
+    "llm",
+    "code-review",
+    "sarif"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsx src/cli.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm typecheck && pnpm test && pnpm build",
+    "eval": "node scripts/eval-fixture.mjs"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.94",
+    "@ai-sdk/openai": "^4.0.106",
+    "@ai-sdk/openai-compatible": "^3.0.82",
+    "ai": "^7.0.159",
+    "ts-morph": "^28.0.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "tsup": "^9.0.0",
+    "tsx": "^4.23.15",
+    "typescript": "5.9.3",
+    "vitest": "^5.0.5"
+  }
+}

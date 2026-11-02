@@ -1,0 +1,29 @@
+{
+  "name": "@doppel/fixture-drift-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ground-truth fixture for Doppel: a small admin dashboard with planted design-system drift.",
+  "type": "module",
+  "scripts": {
+    "expected": "node scripts/generate-expected.mjs",
+    "expected:check": "node scripts/generate-expected.mjs --check",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^2.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.13",
+    "typescript": "^5.6.0"
+  }
+}
