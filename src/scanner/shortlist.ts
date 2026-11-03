@@ -81,16 +81,30 @@ function isTableShaped(fp: Fingerprint): boolean {
   return fp.rootTag === "table"
 }
 
-const RULES: Array<{ component: string; test: (fp: Fingerprint) => boolean }> = [
-  { component: "Button", test: isButtonShaped },
-  { component: "Alert", test: isAlertShaped },
-  { component: "Badge", test: isBadgeShaped },
-  { component: "Input", test: isInputWrapperShaped },
-  { component: "Dialog", test: isDialogOverlay },
-  { component: "Table", test: isTableShaped },
+/**
+ * `why` is shown to the triage model so it judges the scanner's reading of the
+ * markup, not just the bare component name. Without it, a model asked "is this
+ * wrapper <div> an Input?" reasonably says no, when the real question is
+ * whether it's a hand-built form field.
+ */
+const RULES: Array<{ component: string; why: string; test: (fp: Fingerprint) => boolean }> = [
+  { component: "Button", why: "a clickable element styled as a button, or a link padded like one", test: isButtonShaped },
+  { component: "Alert", why: "a coloured notice or status block, or an element with role=alert", test: isAlertShaped },
+  { component: "Badge", why: "a small rounded-full text-xs pill", test: isBadgeShaped },
+  {
+    component: "Input",
+    why: "a wrapper holding a <label> and an <input>: a hand-built form field, which the design system builds from Label + Input",
+    test: isInputWrapperShaped,
+  },
+  { component: "Dialog", why: "a fixed full-screen overlay: a hand-built modal", test: isDialogOverlay },
+  { component: "Table", why: "a raw <table>", test: isTableShaped },
   // Card last: the broadest structural match, so it never masks a more specific rule.
-  { component: "Card", test: isCardShaped },
+  { component: "Card", why: "a bordered, rounded, padded container", test: isCardShaped },
 ]
+
+export function shortlistReason(component: string): string | undefined {
+  return RULES.find((r) => r.component === component)?.why
+}
 
 /** Maps a fingerprint to 1-3 plausible DS component names. Empty when no rule fires. */
 export function shortlistFingerprint(fp: Fingerprint, knownComponents?: string[]): string[] {

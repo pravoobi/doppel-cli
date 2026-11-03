@@ -16,7 +16,7 @@ function cheapReply(prompt: string): string {
   if (prompt.includes("documenting a design-system component")) {
     return JSON.stringify({ description: "A component.", aliases: ["thing"] })
   }
-  const json = prompt.split("no full source yet):\n")[1].split("\n\nFor EACH")[0]
+  const json = prompt.split("excerpt, truncated):\n")[1].split("\n\nFor EACH")[0]
   const candidates = JSON.parse(json) as Array<{ id: string; shortlist: string[] }>
   return JSON.stringify({
     results: candidates.map((c) => ({ id: c.id, match: c.shortlist[0], confidence: 0.9, reason: "looks alike" })),

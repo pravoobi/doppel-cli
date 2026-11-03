@@ -7,7 +7,9 @@ import { CONFIG_FILENAME, loadConfigFile, type DoppelConfig } from "./config.js"
 import { loadDotEnv } from "./env.js"
 import { ConfigError } from "./errors.js"
 import { changedFilesSince } from "./git.js"
+import { PRESETS, resolveTierModels } from "./llm/models.js"
 import { Llm, LlmError } from "./llm/router.js"
+import { dedupedWarningLogger } from "./llm/warnings.js"
 import { runDoppel } from "./pipeline.js"
 import { costLine } from "./report/markdown.js"
 import type { Report } from "./report/types.js"
@@ -27,7 +29,7 @@ Scan options:
   --model <provider:model>  Use one model for every tier, e.g. anthropic:claude-sonnet-5
   --model-cheap <spec>      Model for descriptions and triage
   --model-mid <spec>        Model for adjudication
-  --preset <name>           Built-in model set: anthropic | nebius
+  --preset <name>           Built-in model set: anthropic | openai | nebius
   --since <git-ref>         Only scan .tsx files changed since the merge base with <git-ref>
   --format <list>           Comma-separated: json,md,sarif (default: all)
   --out <dir>               Report directory (default: .doppel)
@@ -37,11 +39,11 @@ Scan options:
   --config <file>           Config file (default: <path>/${CONFIG_FILENAME})
   --quiet                   Only print the summary
 
-Models: set ANTHROPIC_API_KEY or NEBIUS_API_KEY to use a built-in preset, or pass
+Models: set ANTHROPIC_API_KEY, OPENAI_API_KEY or NEBIUS_API_KEY to use a built-in preset, or pass
 --model with any of: anthropic, openai, nebius, openrouter, ollama, or a custom
 OpenAI-compatible provider declared in ${CONFIG_FILENAME}. Keys are read from the
-environment, or from a .env file in the scanned path or the current directory
-(environment variables take precedence).
+environment, or from .env.local / .env in the scanned path or the current
+directory (environment variables take precedence).
 
 Exit codes: 0 ok, 1 --fail-on threshold reached, 2 configuration error, 3 unexpected error.
 `
@@ -125,8 +127,8 @@ async function scan(argv: string[]) {
   if (!["drift", "candidate", "none"].includes(failOn)) {
     throw new ConfigError(`--fail-on must be drift, candidate, or none (got "${failOn}")`)
   }
-  if (values.preset && values.preset !== "anthropic" && values.preset !== "nebius") {
-    throw new ConfigError(`--preset must be anthropic or nebius (got "${values.preset}")`)
+  if (values.preset && !(values.preset in PRESETS)) {
+    throw new ConfigError(`--preset must be one of ${Object.keys(PRESETS).join(", ")} (got "${values.preset}")`)
   }
 
   const config: DoppelConfig = {
@@ -147,6 +149,7 @@ async function scan(argv: string[]) {
   const log = (m: string) => {
     if (!values.quiet) console.error(m)
   }
+  globalThis.AI_SDK_LOG_WARNINGS = dedupedWarningLogger(log)
   log(`doppel ${VERSION} · ${root}`)
   if (envFiles.length > 0) log(`Loaded ${envFiles.map((f) => path.relative(process.cwd(), f) || f).join(", ")}`)
   if (llm) log(`Models: cheap ${llm.models.cheap} · mid ${llm.models.mid}`)
@@ -179,18 +182,24 @@ function init(argv: string[]) {
   const file = path.join(root, CONFIG_FILENAME)
   if (fs.existsSync(file)) throw new ConfigError(`${file} already exists`)
 
+  // No preset is written: this file is usually committed, and each developer's
+  // own key should pick their provider rather than whoever ran init.
   const ds = detectDsDir(root)
   const config: DoppelConfig = {
     ds: ds ? path.relative(root, ds).replace(/\\/g, "/") : "components/ui",
     exclude: [],
     minConfidence: 0.4,
-    ...(process.env.ANTHROPIC_API_KEY ? { preset: "anthropic" as const } : process.env.NEBIUS_API_KEY ? { preset: "nebius" as const } : {}),
   }
   fs.writeFileSync(file, `${JSON.stringify(config, null, 2)}\n`)
   console.log(`Wrote ${file}`)
   if (!ds) console.log(`No components/ui directory found; edit "ds" to point at your design system.`)
-  if (!config.preset) {
-    console.log('No API key found. Set ANTHROPIC_API_KEY or NEBIUS_API_KEY, or add "models" (e.g. {"mid": "openai:<model>"}).')
+
+  loadDotEnv([root, process.cwd()])
+  try {
+    const models = resolveTierModels(config)
+    console.log(`With your current keys, scans will use ${models.cheap} and ${models.mid}.`)
+  } catch {
+    console.log("No API key found yet. Add one to .env.local (see .env.example in the doppel-cli repo) or run with --no-llm.")
   }
   return 0
 }

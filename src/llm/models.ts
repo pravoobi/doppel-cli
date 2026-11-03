@@ -18,13 +18,20 @@ export type TierModels = Record<Tier, string>
 
 /**
  * Only model IDs we could verify go here. Anthropic IDs are current published
- * IDs; Nebius IDs were pinned verbatim from GET /v1/models on 2026-09-23.
+ * IDs; OpenAI IDs were confirmed against GET /v1/models on 2026-11-03; Nebius
+ * IDs were pinned verbatim from GET /v1/models on 2026-09-23. The anthropic,
+ * openai and nebius presets each scored 18/18 on the test fixture.
  */
 export const PRESETS: Record<NonNullable<DoppelConfig["preset"]>, TierModels> = {
   anthropic: {
     cheap: "anthropic:claude-haiku-4-5-20251001",
     mid: "anthropic:claude-sonnet-5",
     strong: "anthropic:claude-opus-5-5",
+  },
+  openai: {
+    cheap: "openai:gpt-5.4-mini",
+    mid: "openai:gpt-5.4",
+    strong: "openai:gpt-5.5",
   },
   nebius: {
     cheap: "nebius:nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
@@ -103,7 +110,8 @@ export function createModel(spec: string, config: DoppelConfig, env: NodeJS.Proc
  */
 export function resolveTierModels(config: DoppelConfig, env: NodeJS.ProcessEnv = process.env): TierModels {
   const presetName =
-    config.preset ?? (env.ANTHROPIC_API_KEY ? "anthropic" : env.NEBIUS_API_KEY ? "nebius" : undefined)
+    config.preset ??
+    (env.ANTHROPIC_API_KEY ? "anthropic" : env.OPENAI_API_KEY ? "openai" : env.NEBIUS_API_KEY ? "nebius" : undefined)
   const preset = presetName ? PRESETS[presetName] : undefined
   const m = config.models ?? {}
 
@@ -113,7 +121,7 @@ export function resolveTierModels(config: DoppelConfig, env: NodeJS.ProcessEnv =
 
   if (!cheap || !mid || !strong) {
     throw new ConfigError(
-      "No model configured. Set ANTHROPIC_API_KEY or NEBIUS_API_KEY to use a built-in preset, " +
+      "No model configured. Set ANTHROPIC_API_KEY, OPENAI_API_KEY or NEBIUS_API_KEY to use a built-in preset, " +
         'pass --model "provider:model", or set "models" in doppel.config.json. Use --no-llm for a deterministic scan.'
     )
   }

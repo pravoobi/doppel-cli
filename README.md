@@ -66,12 +66,13 @@ doppel reads provider keys from environment variables. Set whichever providers y
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...   # Claude (enables the anthropic preset)
-export OPENAI_API_KEY=sk-...          # OpenAI (pass --model openai:<model>)
+export OPENAI_API_KEY=sk-...          # OpenAI (enables the openai preset)
 ```
 
-Or put them in a `.env` file in the repo you're scanning, or in the directory you run doppel
-from. [`.env.example`](.env.example) lists every variable. Keys already set in your shell or CI
-take precedence over the file, and `.env` should stay out of git.
+Or put them in a `.env.local` or `.env` file in the repo you're scanning, or in the directory you
+run doppel from. [`.env.example`](.env.example) lists every variable. `.env.local` wins over
+`.env`, keys already set in your shell or CI win over both, and blank values count as unset.
+Keep both files out of git.
 
 In CI, store keys as repository secrets and pass them as environment variables (see
 [In CI](#in-ci)). No key is needed for `--no-llm` or for a local Ollama model.
@@ -111,14 +112,23 @@ highest precedence first:
 
 1. Flags: `--model provider:model` for every tier, or `--model-cheap` / `--model-mid`.
 2. `models` in `doppel.config.json`.
-3. `--preset anthropic` or `--preset nebius`.
-4. Nothing: the preset is inferred from `ANTHROPIC_API_KEY` or `NEBIUS_API_KEY`.
+3. `--preset anthropic`, `--preset openai` or `--preset nebius`.
+4. Nothing: the preset follows whichever key is set, checked in the order `ANTHROPIC_API_KEY`,
+   `OPENAI_API_KEY`, `NEBIUS_API_KEY`.
+
+| Preset | Triage (cheap) | Adjudication (mid) |
+|---|---|---|
+| `anthropic` | `claude-haiku-4-5-20251001` | `claude-sonnet-5` |
+| `openai` | `gpt-5.4-mini` | `gpt-5.4` |
+| `nebius` | `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B` | `nvidia/nemotron-3-super-120b-a12b` |
+
+Any other model works through its provider prefix:
 
 | Provider | Spec | Key |
 |---|---|---|
-| Anthropic | `anthropic:claude-sonnet-5` | `ANTHROPIC_API_KEY` |
+| Anthropic | `anthropic:<model>` | `ANTHROPIC_API_KEY` |
 | OpenAI | `openai:<model>` | `OPENAI_API_KEY` |
-| Nebius Token Factory | `nebius:nvidia/nemotron-3-super-120b-a12b` | `NEBIUS_API_KEY` |
+| Nebius Token Factory | `nebius:<model>` | `NEBIUS_API_KEY` |
 | OpenRouter | `openrouter:<vendor>/<model>` | `OPENROUTER_API_KEY` |
 | Ollama (local) | `ollama:<model>` | none (`OLLAMA_BASE_URL` to override) |
 | Anything OpenAI-compatible | declare it under `providers` | your choice |
@@ -191,15 +201,24 @@ On the planted-drift fixture in `test/fixtures/drift-demo` (18 known cases: 15 r
 three traps, a marketing hero, a layout wrapper and an unrenderable component):
 
 - The deterministic scanner reaches 100% recall and 100% precision, checked by the test suite.
-- With the Nebius preset (Nemotron Nano for triage, Nemotron Super for adjudication), 18 of 18
-  cases were classified correctly in each of five consecutive runs, at about 19 model calls and
-  $0.04-0.05 per run with descriptions cached.
+- Model classification, scored against the fixture's ground truth:
+
+| Preset | Runs at 18/18 | Calls per run | Tokens in / out | Cost per run |
+|---|---|---|---|---|
+| `openai` (GPT-5.4 mini + GPT-5.4) | 3 of 3 | 42 | ~73k / ~6k | not measured |
+| `anthropic` (Haiku 4.5 + Sonnet 5) | 2 of 2 | 42 | ~116k / ~13k | not measured |
+| `nebius` (Nemotron Nano + Super) | 1 of 2 | 19-20 (descriptions cached) | ~56k / ~36k | $0.04-0.05 |
+
+The other Nemotron run scored 17/18: it called the layout-wrapper trap an intentional deviation
+instead of "not drift". Both verdicts leave the code alone, so no wrong change would be suggested.
+Calls per run include 23 one-time component descriptions where the cache was cold. Cost is "not
+measured" where doppel has no verified price for the model; it never estimates one.
 
 Reproduce it with `node dist/cli.js scan test/fixtures/drift-demo --out .doppel/eval` followed by
 `pnpm eval .doppel/eval`.
 
-This fixture was written by the author, so treat it as a regression test, not a benchmark. The
-Anthropic and OpenAI paths are unit-tested but haven't yet been measured on the fixture.
+This fixture was written by the author, so treat it as a regression test, not a benchmark, and
+read these as small samples.
 
 ## Library use
 

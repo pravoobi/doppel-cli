@@ -20,7 +20,7 @@ export const DoppelConfigSchema = z
   .object({
     ds: z.string().optional(),
     exclude: z.array(z.string()).optional(),
-    preset: z.enum(["anthropic", "nebius"]).optional(),
+    preset: z.enum(["anthropic", "openai", "nebius"]).optional(),
     models: z
       .object({
         cheap: z.string().optional(),

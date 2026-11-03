@@ -86,7 +86,10 @@ describe("model resolution", () => {
 
   it("infers a preset from the available API key", () => {
     expect(resolveTierModels({}, { ANTHROPIC_API_KEY: "x" }).mid).toMatch(/^anthropic:/)
+    expect(resolveTierModels({}, { OPENAI_API_KEY: "x" }).mid).toMatch(/^openai:/)
     expect(resolveTierModels({}, { NEBIUS_API_KEY: "x" }).mid).toMatch(/^nebius:/)
+    expect(resolveTierModels({}, { ANTHROPIC_API_KEY: "x", OPENAI_API_KEY: "y" }).mid).toMatch(/^anthropic:/)
+    expect(resolveTierModels({ preset: "openai" }, { ANTHROPIC_API_KEY: "x" }).mid).toMatch(/^openai:/)
   })
 
   it("explains what to do when nothing is configured", () => {

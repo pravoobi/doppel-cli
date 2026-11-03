@@ -1,6 +1,7 @@
 /** Cheap tier, batched: per-call overhead dominates at this volume, so 20 candidates go in each call. */
 
 import type { Llm } from "../llm/router.js"
+import { shortlistReason } from "../scanner/shortlist.js"
 import type { DsComponent, ShortlistedCandidate } from "../types.js"
 import { mapLimit } from "./concurrency.js"
 import { loadPrompt } from "./prompts.js"
@@ -16,6 +17,13 @@ const BATCH_SIZE = 20
  * candidate is real drift nobody ever reviews.
  */
 export type TriageOutcome = TriageResult & { rerouted?: boolean }
+
+const EXCERPT_CHARS = 600
+
+function excerpt(source: string): string {
+  const compact = source.replace(/\s+/g, " ").trim()
+  return compact.length <= EXCERPT_CHARS ? compact : `${compact.slice(0, EXCERPT_CHARS)} …`
+}
 
 function chunk<T>(items: T[], size: number): T[][] {
   const out: T[][] = []
@@ -50,6 +58,10 @@ async function triageBatch(
       hasHandler: c.fingerprint.hasHandler,
       textSample: c.fingerprint.textSample,
       shortlist: c.shortlist,
+      shortlistedAs: Object.fromEntries(c.shortlist.map((name) => [name, shortlistReason(name) ?? name])),
+      // The fingerprint only describes the root element; for a wrapper, the drift evidence is
+      // often on its children (a hand-styled <input> inside a field <div>).
+      source: excerpt(c.sourceText),
     })),
     null,
     2

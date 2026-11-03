@@ -10,7 +10,12 @@ false negatives here mean real drift never gets reviewed at all.
 Design-system components available:
 {{componentDescriptions}}
 
-Candidates (structural fingerprints only — no full source yet):
+Each candidate's `shortlistedAs` says what the scanner took it to be, e.g. a wrapper holding a
+`<label>` and an `<input>` is shortlisted as Input because it is a hand-built form field the design
+system would express with its Label and Input. Judge whether that reading is right, not whether the
+root element is literally the component.
+
+Candidates (structural fingerprint plus a whitespace-collapsed `source` excerpt, truncated):
 {{candidates}}
 
 For EACH candidate, in the same order, output one object:
